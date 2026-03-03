@@ -166,8 +166,9 @@ struct linePrinter {
     int indentLen;
     void* od;
     outfunc of;
+    bool lineEdge;
 };
-    static void linePrinter_stream(linePrinter* t, char* fmt, ...) {
+    static int linePrinter_stream(linePrinter* t, char* fmt, ...) {
         va_list args;
         va_start(args, fmt);
         char* allocated = NULL;
@@ -177,28 +178,34 @@ struct linePrinter {
         int proxyLen;
         bool newline;
         bool tab;
+        int totalPrinted = 0;
         for (int i = 0; i < len; i++) {
-            if (newline = allocated[i] == '\n') {
+            if (t->lineEdge) {
+                for (int j = 0; j < t->tabCount; j++) {
+                    totalPrinted += t->of(t->od, "%.*s", t->indentLen, t->indent);
+                }
+                t->lineEdge = false;
+            }
+            newline = allocated[i] == '\n';
+            tab = allocated[i] == '\t';
+            if (newline) {
                 proxy = t->newline;
                 proxyLen = t->newlineLen;
+                t->lineEdge = true;
             }
-            else if (tab = allocated[i] == '\t') {
+            else if (tab) {
                 proxy = t->indent;
                 proxyLen = t->indentLen;
             }
             else continue;
-            t->of(t->od, "%.*s", (i - baseIndex), allocated + baseIndex);
+            totalPrinted += t->of(t->od, "%.*s", (i - baseIndex), allocated + baseIndex);
             int iterations = t->tabCount;
-            t->of(t->od, "%.*s", proxyLen, proxy);
-            if (newline) {
-                for (int j = 0; j < iterations; j++) {
-                    t->of(t->od, "%.*s", t->indentLen, t->indent);
-                }
-            }
+            totalPrinted += t->of(t->od, "%.*s", proxyLen, proxy);
             baseIndex = i + 1;
         }
-        t->of(t->od, "%.*s", len - baseIndex, allocated + baseIndex);
+        totalPrinted += t->of(t->od, "%.*s", len - baseIndex, allocated + baseIndex);
         free(allocated);
+        return totalPrinted;
     }
     static linePrinter* linePrinter_init(linePrinter* t, char* newline, char* tabstr, void* od, outfunc of) {
         t->newline = newline;
@@ -208,6 +215,7 @@ struct linePrinter {
         t->tabCount = 0;
         t->od = od;
         t->of = of;
+        t->lineEdge = true;
         return t;
     }
 
