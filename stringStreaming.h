@@ -1,13 +1,15 @@
 #pragma once
 
-#include <stdarg.h>
 #include <stdint.h>
 #include <sys/param.h>
 #include <string.h>
 #include <stddef.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdbool.h>
+
+#include "interfaces.h"
 
 // All types here are made so that they can be passed as a pair of pointers (base, stream function) and used by a caller who does not know their type.
 
@@ -87,7 +89,7 @@ static char** heapstring_getBaseBinding(char* s) {
 }
 
 static void heapstring_bind(char* s, char** b) {
-    memcpy(s + heapstring_basebindoffset, &b, sizeof b);
+    memcpy(s + heapstring_basebindoffset, b, sizeof b);
     *b = heapstring_getBase(s);
 }
 
@@ -155,8 +157,6 @@ cleanup:
     return printed;
 }
 
-typedef int (*outfunc)(void*, char*, ...);
-
 typedef struct linePrinter linePrinter;
 struct linePrinter {
     int tabCount;
@@ -164,8 +164,8 @@ struct linePrinter {
     int newlineLen;
     char* indent;
     int indentLen;
-    void* od;
-    outfunc of;
+    erased outDevice;
+    aprintf printf;
     bool lineEdge;
 };
     static int linePrinter_stream(linePrinter* t, char* fmt, ...) {
@@ -182,7 +182,7 @@ struct linePrinter {
         for (int i = 0; i < len; i++) {
             if (t->lineEdge) {
                 for (int j = 0; j < t->tabCount; j++) {
-                    totalPrinted += t->of(t->od, "%.*s", t->indentLen, t->indent);
+                    totalPrinted += t->printf(t->outDevice, "%.*s", t->indentLen, t->indent);
                 }
                 t->lineEdge = false;
             }
@@ -198,23 +198,23 @@ struct linePrinter {
                 proxyLen = t->indentLen;
             }
             else continue;
-            totalPrinted += t->of(t->od, "%.*s", (i - baseIndex), allocated + baseIndex);
+            totalPrinted += t->printf(t->outDevice, "%.*s", (i - baseIndex), allocated + baseIndex);
             int iterations = t->tabCount;
-            totalPrinted += t->of(t->od, "%.*s", proxyLen, proxy);
+            totalPrinted += t->printf(t->outDevice, "%.*s", proxyLen, proxy);
             baseIndex = i + 1;
         }
-        totalPrinted += t->of(t->od, "%.*s", len - baseIndex, allocated + baseIndex);
+        totalPrinted += t->printf(t->outDevice, "%.*s", len - baseIndex, allocated + baseIndex);
         free(allocated);
         return totalPrinted;
     }
-    static linePrinter* linePrinter_init(linePrinter* t, char* newline, char* tabstr, void* od, outfunc of) {
+    static linePrinter* linePrinter_init(linePrinter* t, char* newline, char* tabstr, erased outDevice, aprintf streamingFunc) {
         t->newline = newline;
         t->newlineLen = strlen(newline);
         t->indent = tabstr;
         t->indentLen = strlen(tabstr);
         t->tabCount = 0;
-        t->od = od;
-        t->of = of;
+        t->outDevice = outDevice;
+        t->printf = streamingFunc;
         t->lineEdge = true;
         return t;
     }
