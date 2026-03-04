@@ -1,7 +1,7 @@
 #pragma once
 
 typedef void* erased;
-#define erase (void*)
+#define erase (void*)(intptr_t)
 
 typedef int (*aprintf)(erased ioDevice, char* fmt, ...);
 typedef int (*awrite)(erased ioDevice, char* input, size_t size);
