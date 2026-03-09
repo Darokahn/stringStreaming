@@ -4,3 +4,5 @@
 // provides a `stream` function but also a `repoint` function so that the head of the iterator can be moved
 // cursor codes treat text-space as a 2D grid, which requires significant bookkeeping as well as memory-moving to reflect operations in a static buffer.
 // a heirarchy of compatible pieces will be defined; Top-level interceptor defers cursor control to a cursor-mapping device; cursor-mapping device wraps underlying stream buffer and can interpret cursor-mapping however it likes. An implementation of the mapping device which assumes its underlying buffer is continuous in memory will be provided.
+
+#include "interfaces.h"
