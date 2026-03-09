@@ -60,6 +60,9 @@ cleanup:
     return printed;
 }
 
+static int staticstring_write(char** s, const char* buf, size_t size) {
+}
+
 // put necessary information at proper offsets
 static void heapstring_serialize(char* s, uint32_t remaining, char* base, char** baseBinding) {
     memcpy(s + heapstring_remainingoffset, &remaining, sizeof remaining);
@@ -112,12 +115,14 @@ static int heapstring_stream(char** s, char* fmt, ...) {
     char* base = heapstring_getBase(*s);
     char** baseBind = heapstring_getBaseBinding(*s);
     bool useBinding = baseBind != 0;
-    va_list args;
+    va_list args, argsCopy;
+    va_start(args, fmt);
+    va_copy(argsCopy, args);
     int printed;
     int stringSize;
     int potentialRemaining;
     while (true) {
-        va_start(args, fmt);
+        va_copy(args, argsCopy);
         stringSize = vsnprintf(*s, remaining, fmt, args);
         printed = MIN(remaining, stringSize);
         potentialRemaining = remaining - printed;
@@ -157,8 +162,7 @@ cleanup:
     return printed;
 }
 
-typedef struct linePrinter linePrinter;
-struct linePrinter {
+typedef struct {
     int tabCount;
     char* newline;
     int newlineLen;
@@ -167,7 +171,7 @@ struct linePrinter {
     erased outDevice;
     aprintf printf;
     bool lineEdge;
-};
+} linePrinter;
     static int linePrinter_stream(linePrinter* t, char* fmt, ...) {
         va_list args;
         va_start(args, fmt);

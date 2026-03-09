@@ -1,3 +1,3 @@
 
 test:
-	gcc main.c tests.c -rdynamic
+	gcc main.c tests.c -rdynamic -g

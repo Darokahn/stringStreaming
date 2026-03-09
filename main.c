@@ -6,23 +6,13 @@
 #include <stdarg.h>
 #include <string.h>
 
-#include "stringStreaming.h"
+#include "stringstream.h"
 
 #define CLR_RESET  "\x1b[0m"
 #define CLR_RED    "\x1b[31m"
 #define CLR_GREEN  "\x1b[32m"
 #define CLR_CYAN   "\x1b[36m"
 #define CLR_BOLD   "\x1b[1m"
-
-int splitstream(FILE* pointerPair[2], char* fmt, ...) {
-    va_list args0;
-    va_start(args0, fmt);
-    va_list args1;
-    va_copy(args1, args0);
-    vfprintf(pointerPair[0], fmt, args0);
-    vfprintf(pointerPair[1], fmt, args1);
-}
-
 
 typedef char* heapString;
 
