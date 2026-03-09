@@ -17,9 +17,9 @@
 #define heapstring_baseoffset (heapstring_remainingoffset + sizeof (uint32_t))
 #define heapstring_basebindoffset (heapstring_baseoffset + sizeof (char*))
 
-#define heapstring_minsize (sizeof (uint32_t) + sizeof (char*) + sizeof (char**) + 1)
+#define heapstring_minsize (int)(sizeof (uint32_t) + sizeof (char*) + sizeof (char**) + 1)
 
-#define staticstring_minsize (1 + sizeof (uint32_t))
+#define staticstring_minsize (int)(1 + sizeof (uint32_t))
 
 static char** staticstring_init(char** s, uint32_t bufsize) {
     if (bufsize < staticstring_minsize) {
@@ -89,7 +89,6 @@ static char** heapstring_getBaseBinding(char* s) {
 }
 
 static void heapstring_bind(char* s, char** b) {
-    int debug_basebindoffset = heapstring_basebindoffset;
     memcpy(s + heapstring_basebindoffset, &b, sizeof b);
     *b = heapstring_getBase(s);
 }
@@ -126,6 +125,8 @@ static int heapstring_stream(char** s, char* fmt, ...) {
             ptrdiff_t currentIndex = *s - base;
             uint32_t capacity = (currentIndex + stringSize + heapstring_minsize) * 2;
             char* oldBase = base;
+            ptrdiff_t walkDistance;
+            if (useBinding) walkDistance = *baseBind - base;
             base = realloc(base, capacity);
             if (base == NULL) {
                 base = oldBase;
@@ -136,7 +137,6 @@ static int heapstring_stream(char** s, char* fmt, ...) {
             *s = base + currentIndex;
             if (useBinding) {
                 // we want to preserve any walking the bound base did, as long as it's validly inside the bounds
-                ptrdiff_t walkDistance = *baseBind - oldBase;
                 // if binding breaks its promise to stay in bounds, unbind it
                 if (walkDistance < 0 || walkDistance > currentIndex) {
                     *baseBind = NULL;
@@ -200,7 +200,6 @@ struct linePrinter {
             }
             else continue;
             totalPrinted += t->printf(t->outDevice, "%.*s", (i - baseIndex), allocated + baseIndex);
-            int iterations = t->tabCount;
             totalPrinted += t->printf(t->outDevice, "%.*s", proxyLen, proxy);
             baseIndex = i + 1;
         }
