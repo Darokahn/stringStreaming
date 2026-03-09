@@ -1,7 +1,7 @@
 #pragma once
 
 typedef void* erased;
-#define erase (void*)
+#define erase (void*)(intptr_t)
 
 // The new standard `ascanf` and `aprintf` should recognize one extra formatter, `%a`, whose meaning is to take an `ioDevice_i` and write to it or read from it instead of a string.
 // To be compatible with the new generic implementations of stdio funcs and generally to be compatible with one another, all `ascanf` and `aprintf` implementations must conform to:

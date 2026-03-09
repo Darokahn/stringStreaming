@@ -92,7 +92,8 @@ static char** heapstring_getBaseBinding(char* s) {
 }
 
 static void heapstring_bind(char* s, char** b) {
-    memcpy(s + heapstring_basebindoffset, b, sizeof b);
+    int debug_basebindoffset = heapstring_basebindoffset;
+    memcpy(s + heapstring_basebindoffset, &b, sizeof b);
     *b = heapstring_getBase(s);
 }
 
