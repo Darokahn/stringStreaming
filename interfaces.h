@@ -66,7 +66,8 @@ typedef struct {
 } read_i;
 
 typedef struct {
-    erased base;
+    erased readBase;
+    erased writeBase;
     write_vt* write;
     read_vt* read;
     seek_vt* seek;
@@ -84,3 +85,5 @@ typedef struct {
     read_vt* read;
     seek_vt* seek;
 } writeseek_i;
+
+// TODO definitions for new standard versions of each FILE* function that instead takes an `ioDevice_i`
