@@ -49,7 +49,6 @@ static int staticstring_stream(char** s, char* fmt, ...) {
     if (potentialRemaining < staticstring_minsize) {
         // decommission the pointer
         *s = NULL;
-        printed = -1;
         goto cleanup;
     }
     remaining = potentialRemaining;

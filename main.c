@@ -7,6 +7,7 @@
 #include <string.h>
 
 #include "stringstream.h"
+#include "objectstream.h"
 
 #define CLR_RESET  "\x1b[0m"
 #define CLR_RED    "\x1b[31m"

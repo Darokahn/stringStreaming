@@ -17,7 +17,8 @@ static void* alignSize(void* ptr, uint8_t align) {
 
 typedef struct {
     uint8_t* base;
-    uint32_t remaining;
+    uint32_t capacity;
+    uint32_t length;
     uint8_t align;
 } objectstream_t;
 
@@ -34,10 +35,11 @@ static uint8_t* bytestream_embed(uint8_t* s, void* data, int remaining, uint8_t 
 
 static int objectstream_write(objectstream_t *s, void* data, size_t size) {
     if (s->base == NULL) return -1;
-    s->base = bytestream_embed(s->base, data, s->remaining, s->align, size);
-    if (s->base == NULL) {
+    uint8_t* result = bytestream_embed(s->base + s->length, data, s->capacity - s->length, s->align, size);
+    if (result == NULL) {
         return 0;
     }
+    s->length = result - s->base;
     return size;
 }
 
@@ -46,6 +48,12 @@ static objectstream_t* objectstream_init(objectstream_t* s, uint8_t* base, uint3
         s->base = NULL;
         return NULL;
     }
-    *s = (objectstream_t){.base=base, .remaining=bufsize, .align=align};
+    *s = (objectstream_t){.base=base, .capacity=bufsize, .length=0, .align=align};
     return s;
 }
+
+// TODO a bitstream which has two constructors; one for the exact bitsize of the objects it holds, and one for the number of distinct values that a slot might hold.
+// accesses will use memcpy and bitwise math to return values from the array that line up with individual objects.
+// A generic version of C++ std::vector<bool>
+
+// TODO a macro that defines wrapper functions around `objectstream` for binding it to a fixed-size type with push/pop/at operations.
