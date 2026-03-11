@@ -78,3 +78,9 @@ typedef struct {
     read_vt* read;
     seek_vt* seek;
 } readseek_i;
+
+typedef struct {
+    erased base;
+    read_vt* read;
+    seek_vt* seek;
+} writeseek_i;
