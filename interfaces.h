@@ -1,4 +1,5 @@
 #pragma once
+#include <stddef.h>
 
 typedef void* erased;
 #define erase (void*)(intptr_t)
