@@ -1,4 +1,7 @@
 #pragma once
+#include <stdint.h>
+#include <stddef.h>
+#include <stdbool.h>
 
 typedef void* erased;
 #define erase (void*)(intptr_t)
